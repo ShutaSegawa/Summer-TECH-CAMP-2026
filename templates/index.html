@@ -8,8 +8,8 @@
 </head>
 <body>
 <header class="topbar">
-  <h1>🎤 音声対話システム <span class="sub">SummerTECH-CAMP 2026</span></h1>
-  <a class="settings-link" href="/settings">⚙️ APIキー設定</a>
+  <h1>{{ profile.system_icon }} {{ profile.system_name }} <span class="sub">SummerTECH-CAMP 2026</span></h1>
+  <a class="settings-link" href="/settings">⚙️ 設定</a>
 </header>
 
 <main class="container">
@@ -85,8 +85,9 @@
 </main>
 
 <script>
-  // サーバーから渡されたAI・モデル一覧
+  // サーバーから渡されたAI・モデル一覧、プロフィール（システム名/アイコン、ユーザー名）
   const AI_PROVIDERS = {{ providers | tojson }};
+  const PROFILE = {{ profile | tojson }};
 </script>
 <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>

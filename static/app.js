@@ -58,7 +58,9 @@ function addBubble(who, text) {
   div.className = "bubble " + who;
   const label = document.createElement("span");
   label.className = "who";
-  label.textContent = who === "user" ? "あなた" : who === "ai" ? "AI" : "エラー";
+  label.textContent = who === "user" ? PROFILE.user_name
+    : who === "ai" ? `${PROFILE.system_icon} ${PROFILE.system_name}`
+    : "エラー";
   div.appendChild(label);
   div.appendChild(document.createTextNode(text));
   chatArea.appendChild(div);
