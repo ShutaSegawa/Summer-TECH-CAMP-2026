@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SummerTECH-CAMP 2026 音声対話システム 実行手順書</title>
+<style>
+  body {
+    font-family: "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
+    line-height: 1.9;
+    color: #333;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 24px 20px 80px;
+    background: #fdfdfd;
+  }
+  h1 {
+    text-align: center;
+    color: #1a73e8;
+    border-bottom: 4px solid #1a73e8;
+    padding-bottom: 12px;
+    margin-top: 40px;
+  }
+  .date { text-align: center; color: #888; margin-bottom: 40px; }
+  h2 {
+    background: #e8f0fe;
+    color: #174ea6;
+    padding: 10px 16px;
+    border-radius: 8px;
+    border-left: 8px solid #1a73e8;
+    margin-top: 56px;
+  }
+  h3 {
+    color: #174ea6;
+    border-bottom: 2px solid #c6dafc;
+    padding-bottom: 4px;
+    margin-top: 32px;
+  }
+  code, pre {
+    font-family: "SF Mono", Consolas, Menlo, monospace;
+    background: #f1f3f4;
+    border-radius: 4px;
+  }
+  code { padding: 2px 6px; font-size: 0.92em; }
+  pre {
+    padding: 14px 18px;
+    overflow-x: auto;
+    border: 1px solid #ddd;
+    font-size: 0.95em;
+  }
+  .box-note {
+    background: #fff8e1;
+    border: 2px solid #ffd54f;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 16px 0;
+  }
+  .box-warn {
+    background: #fdecea;
+    border: 2px solid #f28b82;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 16px 0;
+  }
+  .box-ok {
+    background: #e6f4ea;
+    border: 2px solid #81c995;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 16px 0;
+  }
+  /* ★スクリーンショット指示（編集担当者はこのボックスを画像に置き換える） */
+  .screenshot {
+    color: #d60000;
+    font-weight: bold;
+    border: 3px dashed #d60000;
+    border-radius: 8px;
+    background: #fff5f5;
+    padding: 18px 20px;
+    margin: 18px 0;
+    text-align: center;
+  }
+  .screenshot .ss-no {
+    display: inline-block;
+    background: #d60000;
+    color: #fff;
+    border-radius: 14px;
+    padding: 1px 12px;
+    margin-right: 8px;
+    font-size: 0.9em;
+  }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+  th, td { border: 1px solid #ccc; padding: 8px 12px; text-align: left; }
+  th { background: #e8f0fe; }
+  ol li, ul li { margin: 6px 0; }
+  .toc {
+    background: #f5f9ff;
+    border-radius: 8px;
+    padding: 16px 32px;
+    border: 1px solid #d5e3f5;
+  }
+  .toc a { color: #1a73e8; text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  kbd {
+    border: 1px solid #bbb; border-bottom-width: 3px;
+    border-radius: 4px; padding: 1px 6px; background: #fff; font-size: 0.9em;
+  }
+</style>
+</head>
+<body>
+
+<h1>SummerTECH-CAMP 2026<br>音声対話システム 実行手順書</h1>
+<p class="date">2026年版（最終更新：2026/07/27）</p>
+
+<div class="toc">
+<strong>目次</strong>
+<ol>
+  <li><a href="#sec1">はじめに（このシステムでできること）</a></li>
+  <li><a href="#sec2">準備するもの</a></li>
+  <li><a href="#sec3">Pythonのインストール</a></li>
+  <li><a href="#sec4">プログラムのダウンロード</a></li>
+  <li><a href="#sec5">必要なライブラリのインストール</a></li>
+  <li><a href="#sec6">AIのAPIキーを取得する（使いたいAIだけでOK）</a></li>
+  <li><a href="#sec7">VOICEVOXのインストール（ずんだもんの声を使う場合）</a></li>
+  <li><a href="#sec8">システムの起動</a></li>
+  <li><a href="#sec9">APIキーの登録</a></li>
+  <li><a href="#sec10">使い方</a></li>
+  <li><a href="#sec11">うまく動かないとき（トラブルシューティング）</a></li>
+</ol>
+</div>
+
+<!-- ================================================================ -->
+<h2 id="sec1">1. はじめに（このシステムでできること）</h2>
+<p>
+このシステムは、<strong>マイクに話しかけると、AIが返事をして、合成音声でしゃべってくれる</strong>音声対話システムです。
+Google Chrome（ブラウザ）を画面として使い、裏でPythonのプログラムが動きます。
+</p>
+<ul>
+  <li>音声認識はChromeの機能（Web Speech API）を使うので、<strong>無料・登録不要</strong>。認識の途中経過もリアルタイムで画面に表示されます</li>
+  <li>会話するAIは画面のプルダウンで切り替えられます：<strong>OpenAI (GPT) / Google Gemini / Anthropic Claude / 内蔵簡易AI</strong></li>
+  <li><strong>内蔵簡易AIはAPIキーなしで動く</strong>ので、キーの準備前でも動作確認ができます</li>
+  <li>AIの返事の声は <strong>VOICEVOX</strong>（ずんだもん等）か <strong>gTTS</strong>（Google翻訳の声・キー不要）を選べます</li>
+  <li>「プロンプト」欄を書き換えると、<strong>AIの性格や話し方を自分で自由に変えられます</strong>（実習のメインテーマ！）</li>
+</ul>
+
+<div class="screenshot"><span class="ss-no">スクショ①</span>
+システム起動後のメイン画面全体（左に設定パネル、右に会話エリアが見える状態。何往復か会話した状態が望ましい）
+</div>
+
+<div class="box-note">
+<strong>2024年版との違い（先生・TA向けメモ）</strong><br>
+2024年版はPython製アプリ(PyQt5)＋Google Cloudの音声認識・音声合成でしたが、
+2026年版は<strong>ブラウザUI＋Web Speech API</strong>になり、<strong>Google Cloudの契約・サービスアカウント・環境変数の設定がすべて不要</strong>になりました。
+そのため2024年版手順書にあった「Google のAPIを使うための初期設定方法」「環境変数の登録」の章はこの手順書にはありません。
+</div>
+
+<!-- ================================================================ -->
+<h2 id="sec2">2. 準備するもの</h2>
+<table>
+  <tr><th>もの</th><th>説明</th></tr>
+  <tr><td>パソコン</td><td>Windows または Mac。マイクとスピーカーが使えること</td></tr>
+  <tr><td>Google Chrome</td><td>音声認識に必要です。<strong>必ずChromeを使ってください</strong>（EdgeやSafariでは音声認識が動かないことがあります）</td></tr>
+  <tr><td>Python 3.10以上</td><td>3章でインストールします</td></tr>
+  <tr><td>AIのAPIキー</td><td>GPT / Gemini / Claude を使う場合のみ。<strong>内蔵簡易AIだけならキー不要</strong>（6章）</td></tr>
+  <tr><td>VOICEVOX</td><td>ずんだもん等の声を使う場合のみ（7章）</td></tr>
+</table>
+
+<!-- ================================================================ -->
+<h2 id="sec3">3. Pythonのインストール</h2>
+<p>すでにPython 3.10以上が入っている場合はこの章は飛ばしてOKです。ターミナル（Windowsは「コマンドプロンプト」）で確認できます：</p>
+<pre>python --version</pre>
+<p><code>Python 3.12.x</code> のように表示されれば大丈夫です。</p>
+
+<h3>Windowsの場合</h3>
+<ol>
+  <li><a href="https://www.python.org/downloads/">https://www.python.org/downloads/</a> にアクセスし、「Download Python 3.x.x」ボタンをクリック</li>
+  <li>ダウンロードしたインストーラーを実行</li>
+  <li><strong>最初の画面で必ず「Add python.exe to PATH」にチェックを入れてから</strong>「Install Now」をクリック</li>
+</ol>
+
+<div class="screenshot"><span class="ss-no">スクショ②</span>
+python.org のダウンロードページ（「Download Python」ボタンを赤矢印で指す）
+</div>
+<div class="screenshot"><span class="ss-no">スクショ③</span>
+Pythonインストーラーの最初の画面（「Add python.exe to PATH」のチェックボックスを赤矢印で指す）
+</div>
+
+<h3>Macの場合</h3>
+<p>最初からPythonが入っていることが多いですが、バージョンが古い場合は同じく <a href="https://www.python.org/downloads/">python.org</a> からインストールしてください。</p>
+
+<!-- ================================================================ -->
+<h2 id="sec4">4. プログラムのダウンロード</h2>
+<p>2つの方法があります。どちらでもOKです。</p>
+
+<h3>方法A：ZIPでダウンロード（かんたん）</h3>
+<ol>
+  <li><a href="https://github.com/sayonari/SummerTECH-CAMP-2026-voice-dialogue">https://github.com/sayonari/SummerTECH-CAMP-2026-voice-dialogue</a> をChromeで開く</li>
+  <li>緑色の「<strong>&lt;&gt; Code</strong>」ボタンをクリック</li>
+  <li>「<strong>Download ZIP</strong>」をクリック</li>
+  <li>ダウンロードしたZIPを、デスクトップなどわかりやすい場所に移動して<strong>解凍（展開）</strong>する</li>
+</ol>
+
+<div class="screenshot"><span class="ss-no">スクショ④</span>
+2026年版リポジトリ（sayonari/SummerTECH-CAMP-2026-voice-dialogue）のGitHubページ（緑色の「Code」ボタンを赤矢印で指す）<br>
+※2024年版手順書の同じ場面のスクショの撮り直し。リポジトリ名が新しいものになっていることを確認
+</div>
+<div class="screenshot"><span class="ss-no">スクショ⑤</span>
+「Code」ボタンを押して開いたメニュー（「Download ZIP」を赤矢印で指す）
+</div>
+
+<h3>方法B：gitでクローン（gitが使える人向け）</h3>
+<pre>git clone https://github.com/sayonari/SummerTECH-CAMP-2026-voice-dialogue.git</pre>
+
+<!-- ================================================================ -->
+<h2 id="sec5">5. 必要なライブラリのインストール</h2>
+<ol>
+  <li>ターミナル（Windowsはコマンドプロンプト）を開く</li>
+  <li>解凍したフォルダに移動する：
+    <pre>cd （解凍したフォルダの場所）/SummerTECH-CAMP-2026-voice-dialogue</pre>
+    <div class="box-note">フォルダの場所がわからないときは、<code>cd </code>（cdのあとに半角スペース）とだけ打ってから、フォルダをターミナルの画面に<strong>ドラッグ＆ドロップ</strong>すると場所が自動入力されます。</div>
+  </li>
+  <li>次のコマンドでライブラリをインストールする：
+    <pre>pip install -r requirements.txt</pre>
+  </li>
+</ol>
+
+<div class="screenshot"><span class="ss-no">スクショ⑥</span>
+ターミナルで <code>pip install -r requirements.txt</code> を実行し、インストールが完了した画面（「Successfully installed ...」の表示を赤枠で囲む）
+</div>
+
+<div class="box-warn">
+<code>pip</code> が見つからないと言われたら、<code>pip3 install -r requirements.txt</code> や <code>python -m pip install -r requirements.txt</code> を試してください。
+</div>
+
+<!-- ================================================================ -->
+<h2 id="sec6">6. AIのAPIキーを取得する（使いたいAIだけでOK）</h2>
+
+<div class="box-ok">
+<strong>APIキーとは？</strong>：あなたのプログラムがAIのサービスを使うための「合鍵」となる文字列です。<br>
+<strong>まずはキーなしで試したい人へ</strong>：「内蔵簡易AI」はAPIキーなしで動きます。この章を飛ばして8章に進み、あとから必要になったら戻ってきてもOKです。
+</div>
+
+<div class="box-warn">
+<strong>【重要】APIキーの注意事項</strong>
+<ul>
+  <li>APIキーは<strong>絶対に他人に教えない・SNSやWebに書かない</strong>こと</li>
+  <li>キーは発行した直後にしか表示されないことが多いので、<strong>必ずコピーして自分だけのメモに保存</strong>すること</li>
+  <li>利用量に応じて料金がかかるサービスがあります（実習では配布されたキーの指示に従ってください）</li>
+</ul>
+</div>
+
+<h3>6.1 OpenAI（GPT）のAPIキー</h3>
+<ol>
+  <li><a href="https://platform.openai.com/">https://platform.openai.com/</a> にアクセスし、アカウントを作成（Sign up）またはログインする。Googleアカウントでも登録できます</li>
+  <li>登録には<strong>SMSが受信できる携帯電話番号</strong>による認証が必要です</li>
+  <li>ログイン後、画面左のメニュー（または右上の設定）から「<strong>API keys</strong>」を開く</li>
+  <li>「<strong>Create new secret key</strong>」をクリックし、名前（自由）を付けて作成</li>
+  <li>表示されたキー（<code>sk-</code>で始まる文字列）を<strong>コピーして保存</strong>する。この画面を閉じると二度と表示されません</li>
+</ol>
+
+<div class="screenshot"><span class="ss-no">スクショ⑦</span>
+OpenAI Platform（platform.openai.com）のログイン/サインアップ画面<br>
+※2024年版手順書のOpenAIの章のスクショは画面デザインが変わっている可能性が高いため撮り直し推奨
+</div>
+<div class="screenshot"><span class="ss-no">スクショ⑧</span>
+「API keys」画面で「Create new secret key」ボタンを赤矢印で指す
+</div>
+<div class="screenshot"><span class="ss-no">スクショ⑨</span>
+作成されたシークレットキーの表示画面（キー本体はモザイク・黒塗りにすること！「Copy」ボタンを赤矢印で指す）
+</div>
+
+<h3>6.2 Google Gemini のAPIキー</h3>
+<div class="box-ok">
+2024年版のような「Google Cloudの無料トライアル契約・プロジェクト作成・サービスアカウント」は<strong>一切不要</strong>です。Google AI Studioから数クリックで取得でき、無料枠があります。
+</div>
+<ol>
+  <li><a href="https://aistudio.google.com/">https://aistudio.google.com/</a> にGoogleアカウントでログインする</li>
+  <li>「<strong>Get API key</strong>」（APIキーを取得）をクリック</li>
+  <li>「<strong>APIキーを作成</strong>」をクリック</li>
+  <li>表示されたキー（<code>AIza</code>で始まる文字列）を<strong>コピーして保存</strong>する</li>
+</ol>
+
+<div class="screenshot"><span class="ss-no">スクショ⑩</span>
+Google AI Studio のトップ画面（「Get API key」ボタンを赤矢印で指す）
+</div>
+<div class="screenshot"><span class="ss-no">スクショ⑪</span>
+APIキー作成後の画面（キー本体はモザイク・黒塗りにすること！コピーボタンを赤矢印で指す）
+</div>
+
+<h3>6.3 Anthropic Claude のAPIキー</h3>
+<ol>
+  <li><a href="https://platform.claude.com/">https://platform.claude.com/</a> にアクセスし、アカウントを作成またはログインする</li>
+  <li>ダッシュボードの「<strong>API Keys</strong>」を開く</li>
+  <li>「<strong>Create Key</strong>」をクリックし、名前（自由）を付けて作成</li>
+  <li>表示されたキー（<code>sk-ant-</code>で始まる文字列）を<strong>コピーして保存</strong>する</li>
+</ol>
+
+<div class="screenshot"><span class="ss-no">スクショ⑫</span>
+Claude Console の API Keys 画面（「Create Key」ボタンを赤矢印で指す。既存キーが写る場合は名前・キーをモザイクに）
+</div>
+
+<!-- ================================================================ -->
+<h2 id="sec7">7. VOICEVOXのインストール（ずんだもんの声を使う場合）</h2>
+<p>AIの返事を「ずんだもん」などのキャラクターの声でしゃべらせたい場合は、無料の音声合成ソフト<strong>VOICEVOX</strong>をインストールします。</p>
+<ol>
+  <li><a href="https://voicevox.hiroshiba.jp/">https://voicevox.hiroshiba.jp/</a> にアクセスし、「ダウンロード」をクリック</li>
+  <li>自分のOS（Windows / Mac）用のインストーラーをダウンロードして実行（設問はすべて標準のままでOK）</li>
+  <li>インストールしたら<strong>VOICEVOXアプリを起動しておく</strong>（起動しているだけで、本システムから声を借りられます）</li>
+</ol>
+
+<div class="screenshot"><span class="ss-no">スクショ⑬</span>
+VOICEVOX公式サイトのトップ（「ダウンロード」ボタンを赤矢印で指す）
+</div>
+
+<div class="box-note">
+VOICEVOXを使わない場合でも、キー不要の「gTTS（Google翻訳の声）」で読み上げできます（インターネット接続が必要）。
+</div>
+
+<!-- ================================================================ -->
+<h2 id="sec8">8. システムの起動</h2>
+<ol>
+  <li>ターミナルでプログラムのフォルダに移動する（5章と同じ）</li>
+  <li>次のコマンドでサーバーを起動する：
+    <pre>python server.py</pre>
+  </li>
+  <li>下のような表示が出たら起動成功：
+    <pre>==================================================
+ SummerTECH-CAMP 2026 音声対話システム
+ Chromeで http://localhost:5001 を開いてください
+==================================================</pre>
+  </li>
+  <li><strong>Google Chrome</strong>で <a href="http://localhost:5001">http://localhost:5001</a> を開く</li>
+  <li>マイクボタンを最初に押したとき、Chromeが「マイクの使用を許可しますか？」と聞いてくるので「<strong>許可する</strong>」をクリック</li>
+</ol>
+
+<div class="screenshot"><span class="ss-no">スクショ⑭</span>
+ターミナルで <code>python server.py</code> を実行し、起動メッセージが表示された画面
+</div>
+<div class="screenshot"><span class="ss-no">スクショ⑮</span>
+Chromeのマイク許可ダイアログ（「許可する」を赤矢印で指す）
+</div>
+
+<div class="box-note">
+終了するときは、ターミナルで <kbd>Ctrl</kbd> + <kbd>C</kbd> を押します。
+</div>
+
+<!-- ================================================================ -->
+<h2 id="sec9">9. APIキーの登録</h2>
+<p>GPT / Gemini / Claude を使う場合は、6章で取得したキーをシステムに登録します。方法は2つあります。</p>
+
+<h3>方法A：設定画面から登録（おすすめ）</h3>
+<ol>
+  <li>メイン画面の右上「<strong>⚙️ APIキー設定</strong>」をクリック</li>
+  <li>使いたいAIの欄にキーを貼り付けて「<strong>💾 保存する</strong>」をクリック</li>
+  <li>「✅ 設定済み」と表示されればOK。「← 会話画面にもどる」で戻る</li>
+</ol>
+
+<div class="screenshot"><span class="ss-no">スクショ⑯</span>
+APIキー設定画面（キーを入力した状態。キー本体は伏せ字表示のままでOK。「保存する」ボタンを赤矢印で指す）
+</div>
+
+<h3>方法B：ファイルに直接書く</h3>
+<p>フォルダ内の <code>config.example.json</code> をコピーして <code>config.json</code> という名前にし、中にキーを書き込んでも同じことができます（教員がまとめて設定するときに便利）。</p>
+
+<!-- ================================================================ -->
+<h2 id="sec10">10. 使い方</h2>
+
+<div class="screenshot"><span class="ss-no">スクショ⑰</span>
+メイン画面に番号ラベル（①〜⑥）を書き込んだ図：<br>
+①使うAI/モデルのプルダウン ②プロンプト入力欄 ③声の設定 ④会話エリア ⑤音声認識の途中結果表示（黄色い帯） ⑥マイクボタンとテキスト入力欄
+</div>
+
+<h3>基本の流れ</h3>
+<ol>
+  <li>左パネルの「<strong>使うAI</strong>」で会話したいAIを選ぶ（まずは「内蔵簡易AI」で動作確認がおすすめ）</li>
+  <li>「<strong>🎤 マイクON</strong>」ボタンを押して話しかける
+    <ul><li>話している途中の認識結果が黄色い帯に<strong>リアルタイム表示</strong>されます</li>
+        <li>発話が確定すると会話エリアに表示され、AIが返事をします</li></ul>
+  </li>
+  <li>AIの返事が合成音声で再生されます（再生中は音声認識が自動で一時停止し、終わると再開します）</li>
+  <li>マイクを使わずに、下の<strong>テキスト入力欄</strong>から送信することもできます</li>
+</ol>
+
+<h3>プロンプトでAIの性格を変えてみよう（実習のメイン！）</h3>
+<p>「📝 プロンプト」欄の文章を書き換えると、AIの話し方や性格が変わります。書き換えた内容は<strong>次の発話から</strong>反映されます。</p>
+<table>
+  <tr><th>プロンプトの例</th><th>期待される変化</th></tr>
+  <tr><td>あなたは関西弁で話すお笑い好きのAIです。返事は50文字以内。</td><td>関西弁でボケてくれる</td></tr>
+  <tr><td>あなたは語尾に「なのだ」を付けて話すずんだもんです。</td><td>ずんだもん口調になる（VOICEVOXの声と合わせると◎）</td></tr>
+  <tr><td>あなたは英語の先生です。日本語の発話に対して簡単な英語で返事し、日本語訳も付けてください。</td><td>英会話の練習相手になる</td></tr>
+</table>
+
+<div class="screenshot"><span class="ss-no">スクショ⑱</span>
+プロンプトを書き換えて（例：ずんだもん口調）、実際に口調が変わった会話のスクリーンショット
+</div>
+
+<h3>声を変えてみよう</h3>
+<ul>
+  <li>「🔊 声の設定」で <strong>VOICEVOX</strong>（要：VOICEVOXアプリ起動）と <strong>gTTS</strong> を切り替えられます</li>
+  <li>VOICEVOXでは話者（ずんだもん、四国めたん等）も選べます</li>
+</ul>
+
+<h3>会話のリセット</h3>
+<p>AIは過去の会話を覚えています。話題を切り替えたいときや、プロンプトを大きく変えたときは「🗑️ 会話をリセット」を押しましょう。</p>
+
+<!-- ================================================================ -->
+<h2 id="sec11">11. うまく動かないとき（トラブルシューティング）</h2>
+<table>
+  <tr><th>症状</th><th>対処法</th></tr>
+  <tr><td>マイクボタンを押しても反応しない</td><td>ブラウザがChromeか確認。アドレスバー左のアイコンからマイクを「許可」にする</td></tr>
+  <tr><td>「このブラウザは音声認識に対応していません」と出る</td><td>Google Chromeを使ってください</td></tr>
+  <tr><td>「VOICEVOXエンジンに接続できません」と出る</td><td>VOICEVOXアプリを起動してから、もう一度話しかける。使わない場合は声の設定を「gTTS」に変更</td></tr>
+  <tr><td>「APIキーが設定されていません」と出る</td><td>9章の手順でキーを登録する。または「内蔵簡易AI」に切り替える</td></tr>
+  <tr><td>AIの返事がエラーになる（401など）</td><td>キーの貼り付けミス（前後の空白・改行）がないか確認。キーの利用枠が残っているか各サービスの管理画面で確認</td></tr>
+  <tr><td><code>python server.py</code> でエラーになる</td><td>5章の <code>pip install -r requirements.txt</code> が成功しているか確認。<code>python3 server.py</code> も試す</td></tr>
+  <tr><td>ポート5001が使用中と出る</td><td>すでに起動している別のサーバーを <kbd>Ctrl</kbd>+<kbd>C</kbd> で終了してから再実行</td></tr>
+  <tr><td>自分の声にAIの声が混ざって誤認識される</td><td>イヤホンを使う（スピーカーの音をマイクが拾うのを防げます）</td></tr>
+</table>
+
+<h2>わからないことがあれば</h2>
+<p>手順書の内容でわからないことがあれば、担当教員・TAまで質問してください。</p>
+
+</body>
+</html>

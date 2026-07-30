@@ -1,0 +1,332 @@
+/* SummerTECH-CAMP 2026 音声対話システム - 明るく見やすいデザイン */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+  background: linear-gradient(160deg, #e8f6ff 0%, #fef9e7 100%);
+  color: #333;
+  min-height: 100vh;
+}
+
+/* ---------- ヘッダー ---------- */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.topbar h1 {
+  font-size: 1.3rem;
+  color: #1a73e8;
+}
+
+.topbar .sub {
+  font-size: 0.85rem;
+  color: #888;
+  font-weight: normal;
+  margin-left: 8px;
+}
+
+.settings-link {
+  color: #1a73e8;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: #e8f0fe;
+  transition: background 0.2s;
+}
+
+.settings-link:hover {
+  background: #d2e3fc;
+}
+
+/* ---------- レイアウト ---------- */
+.container {
+  display: flex;
+  gap: 16px;
+  padding: 16px 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  height: calc(100vh - 70px);
+}
+
+.side-panel {
+  width: 320px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chat-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+/* ---------- カード ---------- */
+.card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.card h2 {
+  font-size: 1rem;
+  margin-bottom: 10px;
+  color: #444;
+}
+
+.card label {
+  display: block;
+  font-size: 0.85rem;
+  color: #666;
+  margin: 8px 0 4px;
+}
+
+.card select,
+.card textarea,
+.card input[type="password"],
+.card input[type="text"] {
+  width: 100%;
+  padding: 8px 10px;
+  border: 2px solid #d5e3f5;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: #fafdff;
+}
+
+.card select:focus,
+.card textarea:focus,
+.card input:focus {
+  outline: none;
+  border-color: #1a73e8;
+}
+
+.card textarea {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: #888;
+  margin-bottom: 6px;
+  line-height: 1.6;
+}
+
+/* ---------- 会話エリア ---------- */
+.chat-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.welcome-message {
+  text-align: center;
+  color: #999;
+  padding: 30px 20px;
+  font-size: 0.95rem;
+}
+
+.bubble {
+  max-width: 75%;
+  padding: 12px 16px;
+  border-radius: 18px;
+  line-height: 1.6;
+  font-size: 1rem;
+  word-break: break-word;
+  animation: pop-in 0.2s ease-out;
+}
+
+@keyframes pop-in {
+  from { transform: scale(0.9); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.bubble.user {
+  align-self: flex-end;
+  background: #1a73e8;
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.bubble.ai {
+  align-self: flex-start;
+  background: #f1f6ee;
+  border: 2px solid #cde8c0;
+  border-bottom-left-radius: 4px;
+}
+
+.bubble.error {
+  align-self: center;
+  background: #fdecea;
+  border: 2px solid #f5c6cb;
+  color: #b71c1c;
+  font-size: 0.9rem;
+}
+
+.bubble .who {
+  display: block;
+  font-size: 0.72rem;
+  opacity: 0.7;
+  margin-bottom: 2px;
+}
+
+/* ---------- 音声認識の途中結果 ---------- */
+.interim-area {
+  padding: 10px 20px;
+  background: #fff8e1;
+  border-top: 2px dashed #ffd54f;
+  font-size: 1rem;
+  color: #795548;
+  min-height: 42px;
+}
+
+.interim-label {
+  font-size: 0.75rem;
+  background: #ffb300;
+  color: #fff;
+  border-radius: 10px;
+  padding: 2px 8px;
+  margin-right: 8px;
+}
+
+/* ---------- ステータスバー ---------- */
+.status-bar {
+  padding: 4px 20px;
+  font-size: 0.8rem;
+  color: #1a73e8;
+  min-height: 24px;
+}
+
+/* ---------- 入力エリア ---------- */
+.input-area {
+  display: flex;
+  gap: 10px;
+  padding: 14px 20px;
+  background: #f5f9ff;
+  border-top: 1px solid #e0e8f5;
+}
+
+.input-area input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid #d5e3f5;
+  border-radius: 24px;
+  font-size: 1rem;
+  background: #ffffff;
+}
+
+.input-area input:focus {
+  outline: none;
+  border-color: #1a73e8;
+}
+
+/* ---------- ボタン ---------- */
+.btn {
+  border: none;
+  border-radius: 24px;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.2s;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-mic {
+  background: #34a853;
+  color: #fff;
+  min-width: 130px;
+}
+
+.btn-mic.recording {
+  background: #ea4335;
+  animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(234, 67, 53, 0.5); }
+  70%  { box-shadow: 0 0 0 12px rgba(234, 67, 53, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(234, 67, 53, 0); }
+}
+
+.btn-send {
+  background: #1a73e8;
+  color: #fff;
+}
+
+.btn-danger {
+  background: #fff;
+  color: #ea4335;
+  border: 2px solid #ea4335;
+  width: 100%;
+}
+
+.btn-danger:hover {
+  background: #fdecea;
+}
+
+/* ---------- 設定画面 ---------- */
+.settings-container {
+  flex-direction: column;
+  max-width: 640px;
+  height: auto;
+}
+
+.key-row {
+  margin-bottom: 14px;
+}
+
+.key-status {
+  font-size: 0.78rem;
+  color: #34a853;
+  margin-left: 6px;
+}
+
+.save-message {
+  margin-left: 12px;
+  color: #34a853;
+  font-weight: bold;
+}
+
+/* ---------- スマホなど狭い画面 ---------- */
+@media (max-width: 800px) {
+  .container {
+    flex-direction: column;
+    height: auto;
+  }
+  .side-panel {
+    width: 100%;
+  }
+  .chat-panel {
+    min-height: 60vh;
+  }
+}

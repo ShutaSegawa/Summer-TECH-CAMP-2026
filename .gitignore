@@ -1,0 +1,48 @@
+# Logs
+logs
+*.log
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# --- 非公開（GitHubには音声対話プログラムのみ公開する） ---
+# 過年度資料・情報源（著作権・内部資料のため非公開）
+_ref/
+
+# AI作業用の内部管理ファイル（非公開）
+.agent/
+.claude/
+.spec/
+資料更新作業/
+.references/
+CLAUDE.md
+GEMINI.md
+AGENTS.md
+handoff/
+
+# --- APIキー・秘密情報（絶対にコミットしない） ---
+config.json
+api_keys.txt
+api_keys.json
+*_api_key*
+secrets.*
+config/keys.*
+.env.*
+
+# 会話履歴（個人のやりとりのため公開しない）
+conversation.json

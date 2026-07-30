@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APIキー設定 - SummerTECH-CAMP 2026</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="topbar">
+  <h1>⚙️ APIキー設定</h1>
+  <a class="settings-link" href="/">← 会話画面にもどる</a>
+</header>
+
+<main class="container settings-container">
+  <section class="card">
+    <h2>APIキーの登録</h2>
+    <p class="hint">
+      キーはこのパソコンの <code>config.json</code> に保存されます。<br>
+      内蔵簡易AIはキーなしで使えます。使いたいAIのキーだけ登録すればOKです。
+    </p>
+
+    <div class="key-row">
+      <label for="openai-key">OpenAI APIキー <span id="openai-status" class="key-status"></span></label>
+      <input id="openai-key" type="password" placeholder="sk-... （変更しない場合は空のまま）" autocomplete="off">
+    </div>
+
+    <div class="key-row">
+      <label for="gemini-key">Google Gemini APIキー <span id="gemini-status" class="key-status"></span></label>
+      <input id="gemini-key" type="password" placeholder="AIza... （変更しない場合は空のまま）" autocomplete="off">
+    </div>
+
+    <div class="key-row">
+      <label for="claude-key">Anthropic Claude APIキー <span id="claude-status" class="key-status"></span></label>
+      <input id="claude-key" type="password" placeholder="sk-ant-... （変更しない場合は空のまま）" autocomplete="off">
+    </div>
+
+    <button id="save-button" class="btn btn-send">💾 保存する</button>
+    <span id="save-message" class="save-message"></span>
+  </section>
+
+  <section class="card">
+    <h2>注意</h2>
+    <ul class="hint">
+      <li>APIキーは絶対に他人に教えたり、インターネット上に公開したりしないでください</li>
+      <li>キーの発行方法は手順書を参照してください</li>
+    </ul>
+  </section>
+</main>
+
+<script src="{{ url_for('static', filename='settings.js') }}"></script>
+</body>
+</html>
