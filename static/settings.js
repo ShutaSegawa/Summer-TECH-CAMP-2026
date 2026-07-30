@@ -12,7 +12,48 @@ async function loadProfile() {
     const input = document.getElementById(profileInputIds[key]);
     input.value = data[key] || "";
   }
+  updateIconSelection();
 }
+
+// static/images フォルダの画像一覧をギャラリー表示（クリックでアイコンに設定）
+async function loadIconGallery() {
+  const res = await fetch("/api/icons");
+  const icons = await res.json();
+  const gallery = document.getElementById("icon-gallery");
+  gallery.innerHTML = "";
+  if (icons.length === 0) {
+    gallery.innerHTML = '<p class="hint">static/images フォルダに画像がまだありません。</p>';
+    return;
+  }
+  for (const filename of icons) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "icon-choice";
+    btn.dataset.filename = filename;
+    btn.title = filename;
+    const img = document.createElement("img");
+    img.src = `/static/images/${filename}`;
+    img.alt = filename;
+    btn.appendChild(img);
+    btn.addEventListener("click", () => {
+      document.getElementById("system-icon").value = filename;
+      updateIconSelection();
+    });
+    gallery.appendChild(btn);
+  }
+  updateIconSelection();
+}
+
+// 現在の入力値に一致する画像をギャラリー上でハイライト
+function updateIconSelection() {
+  const current = document.getElementById("system-icon").value;
+  document.querySelectorAll(".icon-choice").forEach((btn) => {
+    btn.classList.toggle("selected", btn.dataset.filename === current);
+  });
+}
+
+document.getElementById("system-icon").addEventListener("input", updateIconSelection);
+loadIconGallery();
 
 document.getElementById("profile-save-button").addEventListener("click", async () => {
   const body = {};

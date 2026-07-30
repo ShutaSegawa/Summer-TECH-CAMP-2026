@@ -8,7 +8,14 @@
 </head>
 <body>
 <header class="topbar">
-  <h1>{{ profile.system_icon }} {{ profile.system_name }} <span class="sub">SummerTECH-CAMP 2026</span></h1>
+  <h1>
+    {% if profile.system_icon_url %}
+    <img src="{{ profile.system_icon_url }}" class="icon-img" alt="">
+    {% else %}
+    {{ profile.system_icon }}
+    {% endif %}
+    {{ profile.system_name }} <span class="sub">SummerTECH-CAMP 2026</span>
+  </h1>
   <a class="settings-link" href="/settings">⚙️ 設定</a>
 </header>
 

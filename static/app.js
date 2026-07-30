@@ -54,16 +54,33 @@ function addBubble(who, text) {
   const welcome = chatArea.querySelector(".welcome-message");
   if (welcome) welcome.remove();
 
+  const row = document.createElement("div");
+  row.className = "message-row " + who;
+
+  if (who === "ai") {
+    const avatar = document.createElement("div");
+    avatar.className = "avatar";
+    if (PROFILE.system_icon_url) {
+      const img = document.createElement("img");
+      img.src = PROFILE.system_icon_url;
+      img.alt = "";
+      avatar.appendChild(img);
+    } else {
+      avatar.textContent = PROFILE.system_icon;
+    }
+    row.appendChild(avatar);
+  }
+
   const div = document.createElement("div");
   div.className = "bubble " + who;
   const label = document.createElement("span");
   label.className = "who";
-  label.textContent = who === "user" ? PROFILE.user_name
-    : who === "ai" ? `${PROFILE.system_icon} ${PROFILE.system_name}`
-    : "エラー";
+  label.textContent = who === "user" ? PROFILE.user_name : who === "ai" ? PROFILE.system_name : "エラー";
   div.appendChild(label);
   div.appendChild(document.createTextNode(text));
-  chatArea.appendChild(div);
+  row.appendChild(div);
+
+  chatArea.appendChild(row);
   chatArea.scrollTop = chatArea.scrollHeight;
 }
 

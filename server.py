@@ -20,6 +20,8 @@ app = Flask(__name__)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
 CONVERSATION_PATH = os.path.join(BASE_DIR, "conversation.json")
+ICON_DIR = os.path.join(BASE_DIR, "static", "images")
+ICON_EXTENSIONS = (".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg")
 
 # VOICEVOXエンジンのアドレス（VOICEVOXアプリを起動しておくと使える）
 VOICEVOX_URL = "http://127.0.0.1:50021"
@@ -90,6 +92,23 @@ def get_profile():
         if value:
             profile[key] = value
     return profile
+
+
+def list_icon_images():
+    """static/images に置かれた画像ファイル名の一覧（アイコン選択肢）"""
+    if not os.path.isdir(ICON_DIR):
+        return []
+    return sorted(
+        f for f in os.listdir(ICON_DIR)
+        if f.lower().endswith(ICON_EXTENSIONS)
+    )
+
+
+def resolve_system_icon_url(icon_value):
+    """system_iconの値がimages内の画像ファイル名なら配信用URLを返す（絵文字ならNone）"""
+    if icon_value in list_icon_images():
+        return f"/static/images/{icon_value}"
+    return None
 
 
 # ----------------------------------------------------------------------
@@ -206,7 +225,9 @@ def chat_with_claude(messages, system_prompt, model):
 # ----------------------------------------------------------------------
 @app.route("/")
 def index():
-    return render_template("index.html", providers=AI_PROVIDERS, profile=get_profile())
+    profile = get_profile()
+    profile["system_icon_url"] = resolve_system_icon_url(profile["system_icon"])
+    return render_template("index.html", providers=AI_PROVIDERS, profile=profile)
 
 
 @app.route("/settings")
@@ -351,6 +372,12 @@ def api_config_post():
 @app.route("/api/profile", methods=["GET"])
 def api_profile_get():
     return jsonify(get_profile())
+
+
+@app.route("/api/icons", methods=["GET"])
+def api_icons_get():
+    """static/images に置かれているアイコン用画像ファイルの一覧"""
+    return jsonify(list_icon_images())
 
 
 @app.route("/api/profile", methods=["POST"])
