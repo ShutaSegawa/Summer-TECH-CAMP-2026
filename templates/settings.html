@@ -14,6 +14,31 @@
 
 <main class="container settings-container">
   <section class="card">
+    <h2>プロフィール設定</h2>
+    <p class="hint">画面に表示するAIの名前・アイコンと、あなたの呼び名を自由に変えられます。</p>
+
+    <div class="key-row">
+      <label for="system-name">システム側の名前（AIの名前）</label>
+      <input id="system-name" type="text" placeholder="例：AI（未入力なら初期値のまま）" autocomplete="off">
+    </div>
+
+    <div class="key-row">
+      <label for="system-icon">システム側のアイコン（絵文字を直接入力、または下のギャラリーから画像を選択）</label>
+      <input id="system-icon" type="text" placeholder="例：🤖（未入力なら初期値のまま）" autocomplete="off">
+      <p class="hint">画像を使いたい場合は <code>static/images/</code> フォルダに画像ファイルを置くと、下のギャラリーから選べるようになります。</p>
+      <div id="icon-gallery" class="icon-gallery"></div>
+    </div>
+
+    <div class="key-row">
+      <label for="user-name">ユーザー側の名前（あなたの呼び名）</label>
+      <input id="user-name" type="text" placeholder="例：あなた（未入力なら初期値のまま）" autocomplete="off">
+    </div>
+
+    <button id="profile-save-button" class="btn btn-send">💾 プロフィールを保存する</button>
+    <span id="profile-save-message" class="save-message"></span>
+  </section>
+
+  <section class="card">
     <h2>APIキーの登録</h2>
     <p class="hint">
       キーはこのパソコンの <code>config.json</code> に保存されます。<br>

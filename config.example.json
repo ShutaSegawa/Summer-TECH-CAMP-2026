@@ -1,5 +1,8 @@
 {
   "openai_api_key": "ここにOpenAIのAPIキーを貼り付ける（使わない場合は空でOK）",
   "gemini_api_key": "ここにGeminiのAPIキーを貼り付ける（使わない場合は空でOK）",
-  "claude_api_key": "ここにClaudeのAPIキーを貼り付ける（使わない場合は空でOK）"
+  "claude_api_key": "ここにClaudeのAPIキーを貼り付ける（使わない場合は空でOK）",
+  "system_name": "AI",
+  "system_icon": "🤖",
+  "user_name": "あなた"
 }
