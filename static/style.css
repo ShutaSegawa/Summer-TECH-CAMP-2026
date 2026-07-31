@@ -35,6 +35,48 @@ body {
   margin-left: 8px;
 }
 
+.icon-img {
+  height: 1.3em;
+  width: 1.3em;
+  object-fit: cover;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+.icon-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.icon-choice {
+  width: 56px;
+  height: 56px;
+  padding: 4px;
+  border: 2px solid #d5e3f5;
+  border-radius: 12px;
+  background: #fafdff;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.icon-choice:hover {
+  border-color: #1a73e8;
+}
+
+.icon-choice.selected {
+  border-color: #1a73e8;
+  background: #e8f0fe;
+}
+
+.icon-choice img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
 .settings-link {
   color: #1a73e8;
   text-decoration: none;
@@ -147,6 +189,40 @@ body {
   font-size: 0.95rem;
 }
 
+.message-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.message-row.user {
+  justify-content: flex-end;
+}
+
+.message-row.error {
+  justify-content: center;
+}
+
+.avatar {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #f1f6ee;
+  border: 2px solid #cde8c0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  overflow: hidden;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .bubble {
   max-width: 75%;
   padding: 12px 16px;
@@ -163,21 +239,18 @@ body {
 }
 
 .bubble.user {
-  align-self: flex-end;
   background: #1a73e8;
   color: #fff;
   border-bottom-right-radius: 4px;
 }
 
 .bubble.ai {
-  align-self: flex-start;
   background: #f1f6ee;
   border: 2px solid #cde8c0;
   border-bottom-left-radius: 4px;
 }
 
 .bubble.error {
-  align-self: center;
   background: #fdecea;
   border: 2px solid #f5c6cb;
   color: #b71c1c;

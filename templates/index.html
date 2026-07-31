@@ -8,8 +8,15 @@
 </head>
 <body>
 <header class="topbar">
-  <h1>🎤 音声対話システム <span class="sub">SummerTECH-CAMP 2026</span></h1>
-  <a class="settings-link" href="/settings">⚙️ APIキー設定</a>
+  <h1>
+    {% if profile.system_icon_url %}
+    <img src="{{ profile.system_icon_url }}" class="icon-img" alt="">
+    {% else %}
+    {{ profile.system_icon }}
+    {% endif %}
+    {{ profile.system_name }} <span class="sub">SummerTECH-CAMP 2026</span>
+  </h1>
+  <a class="settings-link" href="/settings">⚙️ 設定</a>
 </header>
 
 <main class="container">
@@ -46,11 +53,13 @@
       <div id="voicevox-speaker-row">
         <label for="speaker-select">VOICEVOXの話者</label>
         <select id="speaker-select">
-          <option value="3">ずんだもん（ノーマル）</option>
-          <option value="1">四国めたん（あまあま）</option>
-          <option value="2">四国めたん（ノーマル）</option>
+          <option value="2">四国めたん</option>
+          <option value="3" selected>ずんだもん</option>
           <option value="8">春日部つむぎ</option>
-          <option value="14">冥鳴ひまり</option>
+          <option value="11">玄野武宏</option>
+          <option value="13">青山龍星</option>
+          <option value="21">剣崎雌雄</option>
+          <option value="42">ちび式じい</option>
         </select>
       </div>
     </section>
@@ -85,8 +94,9 @@
 </main>
 
 <script>
-  // サーバーから渡されたAI・モデル一覧
+  // サーバーから渡されたAI・モデル一覧、プロフィール（システム名/アイコン、ユーザー名）
   const AI_PROVIDERS = {{ providers | tojson }};
+  const PROFILE = {{ profile | tojson }};
 </script>
 <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>

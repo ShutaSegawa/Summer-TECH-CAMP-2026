@@ -20,9 +20,18 @@ app = Flask(__name__)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
 CONVERSATION_PATH = os.path.join(BASE_DIR, "conversation.json")
+ICON_DIR = os.path.join(BASE_DIR, "static", "images")
+ICON_EXTENSIONS = (".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg")
 
 # VOICEVOXエンジンのアドレス（VOICEVOXアプリを起動しておくと使える）
 VOICEVOX_URL = "http://127.0.0.1:50021"
+
+# プロフィール（システム側の名前・アイコン、ユーザー側の名前）の初期値
+DEFAULT_PROFILE = {
+    "system_name": "AI",
+    "system_icon": "🤖",
+    "user_name": "あなた",
+}
 
 # 利用できるAIとモデルの一覧（プルダウンに表示される）
 AI_PROVIDERS = {
@@ -72,6 +81,34 @@ def get_api_key(provider):
     if not key and provider in env_names:
         key = os.environ.get(env_names[provider], "")
     return key
+
+
+def get_profile():
+    """システム側の名前・アイコン、ユーザー側の名前を取得（未設定なら初期値）"""
+    config = load_config()
+    profile = dict(DEFAULT_PROFILE)
+    for key in DEFAULT_PROFILE:
+        value = (config.get(key) or "").strip()
+        if value:
+            profile[key] = value
+    return profile
+
+
+def list_icon_images():
+    """static/images に置かれた画像ファイル名の一覧（アイコン選択肢）"""
+    if not os.path.isdir(ICON_DIR):
+        return []
+    return sorted(
+        f for f in os.listdir(ICON_DIR)
+        if f.lower().endswith(ICON_EXTENSIONS)
+    )
+
+
+def resolve_system_icon_url(icon_value):
+    """system_iconの値がimages内の画像ファイル名なら配信用URLを返す（絵文字ならNone）"""
+    if icon_value in list_icon_images():
+        return f"/static/images/{icon_value}"
+    return None
 
 
 # ----------------------------------------------------------------------
@@ -188,7 +225,9 @@ def chat_with_claude(messages, system_prompt, model):
 # ----------------------------------------------------------------------
 @app.route("/")
 def index():
-    return render_template("index.html", providers=AI_PROVIDERS)
+    profile = get_profile()
+    profile["system_icon_url"] = resolve_system_icon_url(profile["system_icon"])
+    return render_template("index.html", providers=AI_PROVIDERS, profile=profile)
 
 
 @app.route("/settings")
@@ -325,6 +364,35 @@ def api_config_post():
             config.pop(key_name, None)
     save_config(config)
     return jsonify({"ok": True})
+
+
+# ----------------------------------------------------------------------
+# API：設定（プロフィール = システム側の名前・アイコン、ユーザー側の名前）
+# ----------------------------------------------------------------------
+@app.route("/api/profile", methods=["GET"])
+def api_profile_get():
+    return jsonify(get_profile())
+
+
+@app.route("/api/icons", methods=["GET"])
+def api_icons_get():
+    """static/images に置かれているアイコン用画像ファイルの一覧"""
+    return jsonify(list_icon_images())
+
+
+@app.route("/api/profile", methods=["POST"])
+def api_profile_post():
+    data = request.get_json()
+    config = load_config()
+    for key in DEFAULT_PROFILE:
+        if key in data:
+            value = (data.get(key) or "").strip()
+            if value:
+                config[key] = value
+            else:
+                config.pop(key, None)
+    save_config(config)
+    return jsonify(get_profile())
 
 
 if __name__ == "__main__":
