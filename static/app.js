@@ -6,6 +6,8 @@
 //  - 返事をサーバー(/api/tts)で音声合成して再生（再生中は認識を一時停止）
 
 // ---------- 画面の部品 ----------
+// SPEECH_MODEがfalse（テキスト専用モード）のときは、AI/TTSの選択やマイク関連の
+// 要素はそもそもHTMLに存在しない（index.htmlのJinja条件分岐で描画されない）
 const providerSelect = document.getElementById("provider-select");
 const modelSelect = document.getElementById("model-select");
 const systemPrompt = document.getElementById("system-prompt");
@@ -28,26 +30,29 @@ let speaking = false;       // AIの声を再生中か（再生中は認識を�
 let currentAudio = null;
 
 // ---------- AIプルダウンの初期化 ----------
-function updateModelSelect() {
-  const provider = providerSelect.value;
-  const models = AI_PROVIDERS[provider].models;
-  modelSelect.innerHTML = "";
-  for (const m of models) {
-    const opt = document.createElement("option");
-    opt.value = m;
-    opt.textContent = m;
-    modelSelect.appendChild(opt);
-  }
-}
-providerSelect.addEventListener("change", updateModelSelect);
-updateModelSelect();
+// （テキスト専用モードではAI/TTSの選択UIごと非表示なので、この初期化は不要）
+if (SPEECH_MODE) {
+  const updateModelSelect = () => {
+    const provider = providerSelect.value;
+    const models = AI_PROVIDERS[provider].models;
+    modelSelect.innerHTML = "";
+    for (const m of models) {
+      const opt = document.createElement("option");
+      opt.value = m;
+      opt.textContent = m;
+      modelSelect.appendChild(opt);
+    }
+  };
+  providerSelect.addEventListener("change", updateModelSelect);
+  updateModelSelect();
 
-// TTSエンジンの切替（VOICEVOX以外のときは話者選択を隠す）
-function updateTtsRow() {
-  speakerRow.style.display = ttsSelect.value === "voicevox" ? "" : "none";
+  // TTSエンジンの切替（VOICEVOX以外のときは話者選択を隠す）
+  const updateTtsRow = () => {
+    speakerRow.style.display = ttsSelect.value === "voicevox" ? "" : "none";
+  };
+  ttsSelect.addEventListener("change", updateTtsRow);
+  updateTtsRow();
 }
-ttsSelect.addEventListener("change", updateTtsRow);
-updateTtsRow();
 
 // ---------- 会話表示 ----------
 function addBubble(who, text) {
@@ -89,96 +94,103 @@ function setStatus(msg) {
 }
 
 // ---------- 音声認識（Web Speech API） ----------
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+// テキスト専用モードではマイクボタンごとHTMLに存在しないため、音声認識まわりは
+// SPEECH_MODEのときだけ初期化する
 let recognition = null;
+let startRecognition = () => {};
+let stopRecognition = () => {};
 
-if (!SpeechRecognition) {
-  micButton.disabled = true;
-  setStatus("⚠️ このブラウザは音声認識に対応していません。Google Chromeを使ってください。");
-} else {
-  recognition = new SpeechRecognition();
-  recognition.lang = "ja-JP";
-  recognition.continuous = true;      // 話し続けても認識を続ける
-  recognition.interimResults = true;  // 途中結果もリアルタイムに受け取る
+if (SPEECH_MODE) {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-  recognition.onstart = () => {
-    recognizing = true;
-    setStatus("🎙️ 聞き取り中… 話しかけてください");
-  };
+  if (!SpeechRecognition) {
+    micButton.disabled = true;
+    setStatus("⚠️ このブラウザは音声認識に対応していません。Google Chromeを使ってください。");
+  } else {
+    recognition = new SpeechRecognition();
+    recognition.lang = "ja-JP";
+    recognition.continuous = true;      // 話し続けても認識を続ける
+    recognition.interimResults = true;  // 途中結果もリアルタイムに受け取る
 
-  recognition.onresult = (event) => {
-    let interim = "";
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      const result = event.results[i];
-      if (result.isFinal) {
-        const text = result[0].transcript.trim();
-        interimText.textContent = "";
-        interimArea.hidden = true;
-        if (text) sendMessage(text);
-      } else {
-        interim += result[0].transcript;
+    recognition.onstart = () => {
+      recognizing = true;
+      setStatus("🎙️ 聞き取り中… 話しかけてください");
+    };
+
+    recognition.onresult = (event) => {
+      let interim = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const result = event.results[i];
+        if (result.isFinal) {
+          const text = result[0].transcript.trim();
+          interimText.textContent = "";
+          interimArea.hidden = true;
+          if (text) sendMessage(text);
+        } else {
+          interim += result[0].transcript;
+        }
       }
-    }
-    if (interim) {
-      // 認識の途中結果をリアルタイム表示
-      interimArea.hidden = false;
-      interimText.textContent = interim;
-    }
-  };
+      if (interim) {
+        // 認識の途中結果をリアルタイム表示
+        interimArea.hidden = false;
+        interimText.textContent = interim;
+      }
+    };
 
-  recognition.onerror = (event) => {
-    if (event.error === "not-allowed") {
-      setStatus("⚠️ マイクの使用が許可されていません。アドレスバーのマイクアイコンから許可してください。");
-      micOn = false;
-      updateMicButton();
-    } else if (event.error !== "no-speech" && event.error !== "aborted") {
-      setStatus("⚠️ 音声認識エラー: " + event.error);
-    }
-  };
+    recognition.onerror = (event) => {
+      if (event.error === "not-allowed") {
+        setStatus("⚠️ マイクの使用が許可されていません。アドレスバーのマイクアイコンから許可してください。");
+        micOn = false;
+        updateMicButton();
+      } else if (event.error !== "no-speech" && event.error !== "aborted") {
+        setStatus("⚠️ 音声認識エラー: " + event.error);
+      }
+    };
 
-  recognition.onend = () => {
-    recognizing = false;
-    // マイクONのままなら自動で再開（AIの声の再生中は再開しない）
-    if (micOn && !speaking) {
+    recognition.onend = () => {
+      recognizing = false;
+      // マイクONのままなら自動で再開（AIの声の再生中は再開しない）
+      if (micOn && !speaking) {
+        try { recognition.start(); } catch (e) { /* すでに開始済みなら無視 */ }
+      }
+    };
+  }
+
+  startRecognition = () => {
+    if (recognition && !recognizing && !speaking) {
       try { recognition.start(); } catch (e) { /* すでに開始済みなら無視 */ }
     }
   };
-}
 
-function startRecognition() {
-  if (recognition && !recognizing && !speaking) {
-    try { recognition.start(); } catch (e) { /* すでに開始済みなら無視 */ }
-  }
-}
+  stopRecognition = () => {
+    if (recognition && recognizing) {
+      recognition.stop();
+    }
+    interimArea.hidden = true;
+    interimText.textContent = "";
+  };
 
-function stopRecognition() {
-  if (recognition && recognizing) {
-    recognition.stop();
-  }
-  interimArea.hidden = true;
-  interimText.textContent = "";
-}
+  const updateMicButton = () => {
+    if (micOn) {
+      micButton.classList.add("recording");
+      micButton.textContent = "⏹ マイクOFF";
+    } else {
+      micButton.classList.remove("recording");
+      micButton.textContent = "🎤 マイクON";
+      setStatus("");
+    }
+  };
 
-function updateMicButton() {
-  if (micOn) {
-    micButton.classList.add("recording");
-    micButton.textContent = "⏹ マイクOFF";
-  } else {
-    micButton.classList.remove("recording");
-    micButton.textContent = "🎤 マイクON";
-    setStatus("");
-  }
+  micButton.addEventListener("click", () => {
+    micOn = !micOn;
+    updateMicButton();
+    if (micOn) {
+      startRecognition();
+    } else {
+      stopRecognition();
+    }
+  });
 }
-
-micButton.addEventListener("click", () => {
-  micOn = !micOn;
-  updateMicButton();
-  if (micOn) {
-    startRecognition();
-  } else {
-    stopRecognition();
-  }
-});
 
 // ---------- AIとの会話 ----------
 async function sendMessage(text) {
@@ -186,15 +198,15 @@ async function sendMessage(text) {
   setStatus("🤖 AIが考え中…");
 
   try {
+    const body = { text: text, system_prompt: systemPrompt.value };
+    if (SPEECH_MODE) {
+      body.provider = providerSelect.value;
+      body.model = modelSelect.value;
+    }
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        text: text,
-        provider: providerSelect.value,
-        model: modelSelect.value,
-        system_prompt: systemPrompt.value,
-      }),
+      body: JSON.stringify(body),
     });
     const data = await res.json();
     if (!res.ok) {
@@ -204,7 +216,7 @@ async function sendMessage(text) {
     }
     addBubble("ai", data.reply);
     setStatus("");
-    await speak(data.reply);
+    if (SPEECH_MODE) await speak(data.reply);
   } catch (e) {
     addBubble("error", "サーバーに接続できません: " + e.message);
     setStatus("");
@@ -273,7 +285,10 @@ textInput.addEventListener("keydown", (e) => {
 resetButton.addEventListener("click", async () => {
   if (!confirm("会話の履歴をすべて消しますか？")) return;
   await fetch("/api/reset", { method: "POST" });
-  chatArea.innerHTML = '<div class="welcome-message">会話をリセットしました。マイクボタン🎤を押して話しかけてみよう！</div>';
+  const message = SPEECH_MODE
+    ? "会話をリセットしました。マイクボタン🎤を押して話しかけてみよう！"
+    : "会話をリセットしました。下の入力欄からメッセージを送ってみよう！";
+  chatArea.innerHTML = `<div class="welcome-message">${message}</div>`;
 });
 
 // ---------- 起動時：過去の会話履歴を読み込む ----------

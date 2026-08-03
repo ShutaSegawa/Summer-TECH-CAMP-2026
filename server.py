@@ -7,6 +7,7 @@ SummerTECH-CAMP 2026 音声対話システム サーバー
 - 起動方法:  python server.py  →  http://localhost:5001 をChromeで開く
 """
 
+import argparse
 import io
 import json
 import os
@@ -15,6 +16,24 @@ import requests
 from flask import Flask, jsonify, render_template, request, send_file
 
 app = Flask(__name__)
+
+# ----------------------------------------------------------------------
+# 起動オプション
+#   --speech : 音声入出力＋全カスタマイズ機能を使えるモード（従来の動作）
+#   --admin  : APIキー設定画面を表示するモード（生徒に配るPCでは付けない）
+#   何も付けない場合はテキスト入力のみのモードで、LLMはGPT固定・音声合成なし
+# ----------------------------------------------------------------------
+def parse_args():
+    parser = argparse.ArgumentParser(description="SummerTECH-CAMP 2026 音声対話システム")
+    parser.add_argument("--speech", action="store_true", help="音声入出力とAI/TTSのカスタマイズを有効にする")
+    parser.add_argument("--admin", action="store_true", help="APIキー設定画面を有効にする")
+    return parser.parse_args()
+
+
+_args = parse_args()
+SPEECH_MODE = _args.speech
+ADMIN_MODE = _args.admin
+DEFAULT_TEXT_ONLY_MODEL = "gpt-5.4-nano"
 
 # ファイルの置き場所（このファイルと同じフォルダ）
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -227,12 +246,18 @@ def chat_with_claude(messages, system_prompt, model):
 def index():
     profile = get_profile()
     profile["system_icon_url"] = resolve_system_icon_url(profile["system_icon"])
-    return render_template("index.html", providers=AI_PROVIDERS, profile=profile)
+    return render_template(
+        "index.html",
+        providers=AI_PROVIDERS,
+        profile=profile,
+        speech_mode=SPEECH_MODE,
+        admin_mode=ADMIN_MODE,
+    )
 
 
 @app.route("/settings")
 def settings():
-    return render_template("settings.html")
+    return render_template("settings.html", speech_mode=SPEECH_MODE, admin_mode=ADMIN_MODE)
 
 
 # ----------------------------------------------------------------------
@@ -245,6 +270,11 @@ def api_chat():
     provider = data.get("provider", "simple")
     model = data.get("model", "")
     system_prompt = (data.get("system_prompt") or "").strip() or "あなたは高校生と楽しく会話するアシスタントです。返事は50文字以内で短く話してください。"
+
+    if not SPEECH_MODE:
+        # テキスト専用モードではLLMをGPT固定にする（クライアントからの指定は無視）
+        provider = "openai"
+        model = DEFAULT_TEXT_ONLY_MODEL
 
     if not text:
         return jsonify({"error": "テキストが空です"}), 400
@@ -288,6 +318,9 @@ def api_reset():
 # ----------------------------------------------------------------------
 @app.route("/api/tts", methods=["POST"])
 def api_tts():
+    if not SPEECH_MODE:
+        return jsonify({"error": "この起動モードでは音声合成は利用できません"}), 403
+
     data = request.get_json()
     text = (data.get("text") or "").strip()
     engine = data.get("engine", "gtts")
@@ -338,6 +371,9 @@ def mask_key(key):
 
 @app.route("/api/config", methods=["GET"])
 def api_config_get():
+    if not ADMIN_MODE:
+        return jsonify({"error": "この機能は現在無効です"}), 403
+
     config = load_config()
     return jsonify({
         "openai_api_key": mask_key(get_api_key("openai")),
@@ -353,6 +389,9 @@ def api_config_get():
 
 @app.route("/api/config", methods=["POST"])
 def api_config_post():
+    if not ADMIN_MODE:
+        return jsonify({"error": "この機能は現在無効です"}), 403
+
     data = request.get_json()
     config = load_config()
     for provider in ("openai", "gemini", "claude"):
@@ -382,6 +421,9 @@ def api_icons_get():
 
 @app.route("/api/profile", methods=["POST"])
 def api_profile_post():
+    if not SPEECH_MODE:
+        return jsonify({"error": "この機能は現在無効です"}), 403
+
     data = request.get_json()
     config = load_config()
     for key in DEFAULT_PROFILE:
@@ -398,6 +440,7 @@ def api_profile_post():
 if __name__ == "__main__":
     print("=" * 50)
     print(" SummerTECH-CAMP 2026 音声対話システム")
+    print(f" モード: {'音声対話（--speech）' if SPEECH_MODE else 'テキスト専用（デフォルト）'} / 管理者機能: {'有効（--admin）' if ADMIN_MODE else '無効'}")
     print(" Chromeで http://localhost:5001 を開いてください")
     print("=" * 50)
     app.run(host="127.0.0.1", port=5001, debug=True)
