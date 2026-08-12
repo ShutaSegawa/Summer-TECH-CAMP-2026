@@ -1,4 +1,6 @@
 // APIキー・プロフィール設定画面のプログラム
+// 起動モードによってプロフィール欄・APIキー欄はHTMLごと出し分けられているため、
+// それぞれ対応するボタンが存在するときだけ初期化する
 
 const fields = ["openai", "gemini", "claude"];
 const profileFields = ["system_name", "system_icon", "user_name"];
@@ -15,14 +17,14 @@ async function loadProfile() {
   updateIconSelection();
 }
 
-// static/images フォルダの画像一覧をギャラリー表示（クリックでアイコンに設定）
+// images フォルダの画像一覧をギャラリー表示（クリックでアイコンに設定）
 async function loadIconGallery() {
   const res = await fetch("/api/icons");
   const icons = await res.json();
   const gallery = document.getElementById("icon-gallery");
   gallery.innerHTML = "";
   if (icons.length === 0) {
-    gallery.innerHTML = '<p class="hint">static/images フォルダに画像がまだありません。</p>';
+    gallery.innerHTML = '<p class="hint">images フォルダに画像がまだありません。</p>';
     return;
   }
   for (const filename of icons) {
@@ -32,7 +34,7 @@ async function loadIconGallery() {
     btn.dataset.filename = filename;
     btn.title = filename;
     const img = document.createElement("img");
-    img.src = `/static/images/${filename}`;
+    img.src = `/images/${filename}`;
     img.alt = filename;
     btn.appendChild(img);
     btn.addEventListener("click", () => {
@@ -52,30 +54,33 @@ function updateIconSelection() {
   });
 }
 
-document.getElementById("system-icon").addEventListener("input", updateIconSelection);
-loadIconGallery();
+const profileSaveButton = document.getElementById("profile-save-button");
+if (profileSaveButton) {
+  document.getElementById("system-icon").addEventListener("input", updateIconSelection);
+  loadIconGallery();
 
-document.getElementById("profile-save-button").addEventListener("click", async () => {
-  const body = {};
-  for (const key of profileFields) {
-    body[key] = document.getElementById(profileInputIds[key]).value.trim();
-  }
-  const res = await fetch("/api/profile", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+  profileSaveButton.addEventListener("click", async () => {
+    const body = {};
+    for (const key of profileFields) {
+      body[key] = document.getElementById(profileInputIds[key]).value.trim();
+    }
+    const res = await fetch("/api/profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const msg = document.getElementById("profile-save-message");
+    if (res.ok) {
+      msg.textContent = "保存しました！";
+      setTimeout(() => (msg.textContent = ""), 3000);
+    } else {
+      msg.textContent = "保存に失敗しました";
+      msg.style.color = "#ea4335";
+    }
   });
-  const msg = document.getElementById("profile-save-message");
-  if (res.ok) {
-    msg.textContent = "保存しました！";
-    setTimeout(() => (msg.textContent = ""), 3000);
-  } else {
-    msg.textContent = "保存に失敗しました";
-    msg.style.color = "#ea4335";
-  }
-});
 
-loadProfile();
+  loadProfile();
+}
 
 // 現在の設定状況を表示（キー本体は伏せ字で表示される）
 async function loadStatus() {
@@ -93,27 +98,30 @@ async function loadStatus() {
   }
 }
 
-document.getElementById("save-button").addEventListener("click", async () => {
-  const body = {};
-  for (const p of fields) {
-    const value = document.getElementById(`${p}-key`).value.trim();
-    if (value) body[`${p}_api_key`] = value;
-  }
-  const res = await fetch("/api/config", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+const saveButton = document.getElementById("save-button");
+if (saveButton) {
+  saveButton.addEventListener("click", async () => {
+    const body = {};
+    for (const p of fields) {
+      const value = document.getElementById(`${p}-key`).value.trim();
+      if (value) body[`${p}_api_key`] = value;
+    }
+    const res = await fetch("/api/config", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const msg = document.getElementById("save-message");
+    if (res.ok) {
+      msg.textContent = "保存しました！";
+      for (const p of fields) document.getElementById(`${p}-key`).value = "";
+      loadStatus();
+      setTimeout(() => (msg.textContent = ""), 3000);
+    } else {
+      msg.textContent = "保存に失敗しました";
+      msg.style.color = "#ea4335";
+    }
   });
-  const msg = document.getElementById("save-message");
-  if (res.ok) {
-    msg.textContent = "保存しました！";
-    for (const p of fields) document.getElementById(`${p}-key`).value = "";
-    loadStatus();
-    setTimeout(() => (msg.textContent = ""), 3000);
-  } else {
-    msg.textContent = "保存に失敗しました";
-    msg.style.color = "#ea4335";
-  }
-});
 
-loadStatus();
+  loadStatus();
+}

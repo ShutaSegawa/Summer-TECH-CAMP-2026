@@ -13,6 +13,13 @@
 </header>
 
 <main class="container settings-container">
+  {% if not speech_mode and not admin_mode %}
+  <section class="card">
+    <p class="hint">現在の起動モードでは、このページで利用できる設定はありません。</p>
+  </section>
+  {% endif %}
+
+  {% if speech_mode %}
   <section class="card">
     <h2>プロフィール設定</h2>
     <p class="hint">画面に表示するAIの名前・アイコンと、あなたの呼び名を自由に変えられます。</p>
@@ -25,7 +32,7 @@
     <div class="key-row">
       <label for="system-icon">システム側のアイコン（絵文字を直接入力、または下のギャラリーから画像を選択）</label>
       <input id="system-icon" type="text" placeholder="例：🤖（未入力なら初期値のまま）" autocomplete="off">
-      <p class="hint">画像を使いたい場合は <code>static/images/</code> フォルダに画像ファイルを置くと、下のギャラリーから選べるようになります。</p>
+      <p class="hint">画像を使いたい場合は <code>images/</code> フォルダに画像ファイルを置くと、下のギャラリーから選べるようになります。</p>
       <div id="icon-gallery" class="icon-gallery"></div>
     </div>
 
@@ -37,7 +44,9 @@
     <button id="profile-save-button" class="btn btn-send">💾 プロフィールを保存する</button>
     <span id="profile-save-message" class="save-message"></span>
   </section>
+  {% endif %}
 
+  {% if admin_mode %}
   <section class="card">
     <h2>APIキーの登録</h2>
     <p class="hint">
@@ -72,6 +81,7 @@
       <li>本システムの音声合成にはVOICEVOX（四国めたん、ずんだもん、春日部つむぎ、玄野武宏、青山龍星、剣崎雌雄、ちび式じい）を使用しています</li>
     </ul>
   </section>
+  {% endif %}
 </main>
 
 <script src="{{ url_for('static', filename='settings.js') }}"></script>

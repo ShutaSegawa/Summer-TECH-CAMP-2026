@@ -9,19 +9,17 @@
 <body>
 <header class="topbar">
   <h1>
-    {% if profile.system_icon_url %}
-    <img src="{{ profile.system_icon_url }}" class="icon-img" alt="">
-    {% else %}
-    {{ profile.system_icon }}
-    {% endif %}
-    {{ profile.system_name }} <span class="sub">SummerTECH-CAMP 2026</span>
+    <span class="sub">SummerTECH-CAMP 2026</span>
   </h1>
+  {% if speech_mode or admin_mode %}
   <a class="settings-link" href="/settings">⚙️ 設定</a>
+  {% endif %}
 </header>
 
 <main class="container">
   <!-- 左パネル：設定 -->
   <aside class="panel side-panel">
+    {% if speech_mode %}
     <section class="card">
       <h2>🤖 AIの設定</h2>
       <label for="provider-select">使うAI</label>
@@ -34,6 +32,7 @@
       <label for="model-select">モデル</label>
       <select id="model-select"></select>
     </section>
+    {% endif %}
 
     <section class="card">
       <h2>📝 プロンプト（AIへの指示）</h2>
@@ -41,6 +40,7 @@
       <textarea id="system-prompt" rows="8">あなたは高校生と楽しく会話するアシスタントです。返事は50文字以内で短く、親しみやすく話してください。</textarea>
     </section>
 
+    {% if speech_mode %}
     <section class="card">
       <h2>🔊 声の設定</h2>
       <label for="tts-select">音声合成エンジン</label>
@@ -63,6 +63,7 @@
         </select>
       </div>
     </section>
+    {% endif %}
 
     <section class="card">
       <button id="reset-button" class="btn btn-danger">🗑️ 会話をリセット</button>
@@ -73,20 +74,28 @@
   <section class="panel chat-panel">
     <div id="chat-area" class="chat-area">
       <div class="welcome-message">
+        {% if speech_mode %}
         マイクボタン🎤を押して話しかけるか、下の入力欄からメッセージを送ってみよう！
+        {% else %}
+        下の入力欄からメッセージを送ってみよう！
+        {% endif %}
       </div>
     </div>
 
+    {% if speech_mode %}
     <!-- 音声認識の途中結果をリアルタイム表示 -->
     <div id="interim-area" class="interim-area" hidden>
       <span class="interim-label">認識中…</span>
       <span id="interim-text"></span>
     </div>
+    {% endif %}
 
     <div id="status-bar" class="status-bar"></div>
 
     <div class="input-area">
+      {% if speech_mode %}
       <button id="mic-button" class="btn btn-mic" title="マイクON/OFF">🎤 マイクON</button>
+      {% endif %}
       <input id="text-input" type="text" placeholder="次の発話を入力（Enterで送信）" autocomplete="off">
       <button id="send-button" class="btn btn-send">送信</button>
     </div>
@@ -94,9 +103,10 @@
 </main>
 
 <script>
-  // サーバーから渡されたAI・モデル一覧、プロフィール（システム名/アイコン、ユーザー名）
+  // サーバーから渡されたAI・モデル一覧、プロフィール（システム名/アイコン、ユーザー名）、起動モード
   const AI_PROVIDERS = {{ providers | tojson }};
   const PROFILE = {{ profile | tojson }};
+  const SPEECH_MODE = {{ speech_mode | tojson }};
 </script>
 <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
