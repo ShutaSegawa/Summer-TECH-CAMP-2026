@@ -13,7 +13,7 @@ import json
 import os
 
 import requests
-from flask import Flask, jsonify, render_template, request, send_file
+from flask import Flask, jsonify, render_template, request, send_file, send_from_directory
 
 app = Flask(__name__)
 
@@ -39,7 +39,7 @@ DEFAULT_TEXT_ONLY_MODEL = "gpt-5.4-nano"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
 CONVERSATION_PATH = os.path.join(BASE_DIR, "conversation.json")
-ICON_DIR = os.path.join(BASE_DIR, "static", "images")
+ICON_DIR = os.path.join(BASE_DIR, "images")
 ICON_EXTENSIONS = (".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg")
 
 # VOICEVOXエンジンのアドレス（VOICEVOXアプリを起動しておくと使える）
@@ -114,7 +114,7 @@ def get_profile():
 
 
 def list_icon_images():
-    """static/images に置かれた画像ファイル名の一覧（アイコン選択肢）"""
+    """images/ に置かれた画像ファイル名の一覧（アイコン選択肢）"""
     if not os.path.isdir(ICON_DIR):
         return []
     return sorted(
@@ -126,7 +126,7 @@ def list_icon_images():
 def resolve_system_icon_url(icon_value):
     """system_iconの値がimages内の画像ファイル名なら配信用URLを返す（絵文字ならNone）"""
     if icon_value in list_icon_images():
-        return f"/static/images/{icon_value}"
+        return f"/images/{icon_value}"
     return None
 
 
@@ -415,8 +415,14 @@ def api_profile_get():
 
 @app.route("/api/icons", methods=["GET"])
 def api_icons_get():
-    """static/images に置かれているアイコン用画像ファイルの一覧"""
+    """images/ に置かれているアイコン用画像ファイルの一覧"""
     return jsonify(list_icon_images())
+
+
+@app.route("/images/<path:filename>")
+def serve_icon_image(filename):
+    """images/ に置かれたアイコン用画像ファイルを配信する"""
+    return send_from_directory(ICON_DIR, filename)
 
 
 @app.route("/api/profile", methods=["POST"])
