@@ -52,12 +52,8 @@ DEFAULT_PROFILE = {
     "user_name": "あなた",
 }
 
-# 利用できるAIとモデルの一覧（プルダウンに表示される）
+# 利用できるAIとモデルの一覧（プルダウンに表示される。先頭がデフォルト選択）
 AI_PROVIDERS = {
-    "simple": {
-        "label": "内蔵簡易AI（APIキー不要）",
-        "models": ["pattern-bot"],
-    },
     "openai": {
         "label": "OpenAI (GPT)",
         "models": ["gpt-5.4-nano"],
@@ -69,6 +65,10 @@ AI_PROVIDERS = {
     "claude": {
         "label": "Anthropic Claude",
         "models": ["claude-haiku-4-5"],
+    },
+    "simple": {
+        "label": "内蔵簡易AI（APIキー不要）",
+        "models": ["pattern-bot"],
     },
 }
 
@@ -267,7 +267,7 @@ def settings():
 def api_chat():
     data = request.get_json()
     text = (data.get("text") or "").strip()
-    provider = data.get("provider", "simple")
+    provider = data.get("provider", "openai")
     model = data.get("model", "")
     system_prompt = (data.get("system_prompt") or "").strip() or "あなたは高校生と楽しく会話するアシスタントです。返事は50文字以内で短く話してください。"
 

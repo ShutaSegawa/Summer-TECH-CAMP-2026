@@ -19,6 +19,12 @@
 <main class="container">
   <!-- 左パネル：設定 -->
   <aside class="panel side-panel">
+    <section class="card">
+      <h2>📝 プロンプト（AIへの指示）</h2>
+      <p class="hint">AIの性格や話し方を自由に書いてみよう！</p>
+      <textarea id="system-prompt" rows="8">あなたは高校生と楽しく会話するアシスタントです。返事は50文字以内で短く、親しみやすく話してください。</textarea>
+    </section>
+
     {% if speech_mode %}
     <section class="card">
       <h2>🤖 AIの設定</h2>
@@ -32,21 +38,13 @@
       <label for="model-select">モデル</label>
       <select id="model-select"></select>
     </section>
-    {% endif %}
 
-    <section class="card">
-      <h2>📝 プロンプト（AIへの指示）</h2>
-      <p class="hint">AIの性格や話し方を自由に書いてみよう！</p>
-      <textarea id="system-prompt" rows="8">あなたは高校生と楽しく会話するアシスタントです。返事は50文字以内で短く、親しみやすく話してください。</textarea>
-    </section>
-
-    {% if speech_mode %}
     <section class="card">
       <h2>🔊 声の設定</h2>
       <label for="tts-select">音声合成エンジン</label>
       <select id="tts-select">
+        <option value="gtts" selected>gTTS（Google翻訳の声）</option>
         <option value="voicevox">VOICEVOX（ずんだもん等）</option>
-        <option value="gtts">gTTS（Google翻訳の声）</option>
         <option value="none">読み上げなし</option>
       </select>
 
