@@ -224,9 +224,36 @@ async function sendMessage(text) {
 }
 
 // ---------- 音声合成（サーバー側TTS） ----------
+// 返事を文単位に分割し、1文目の再生中に2文目以降を裏で合成しておくことで
+// 「話し始めるまでの待ち時間」を短縮する（句点・感嘆符・疑問符・改行で区切る）
+function splitSentences(text) {
+  return text
+    .split(/(?<=[。！？\n])/)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+}
+
+async function fetchTtsAudio(text, engine, speaker) {
+  const res = await fetch("/api/tts", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text: text, engine: engine, speaker: speaker }),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || "音声合成に失敗しました");
+  }
+  const blob = await res.blob();
+  return URL.createObjectURL(blob);
+}
+
 async function speak(text) {
   const engine = ttsSelect.value;
   if (engine === "none") return;
+
+  const sentences = splitSentences(text);
+  if (sentences.length === 0) return;
+  const speaker = speakerSelect.value;
 
   // エコー対策：AIの声をマイクが拾わないよう、再生中は認識を止める
   speaking = true;
@@ -234,22 +261,13 @@ async function speak(text) {
   setStatus("🔊 AIが話しています…");
 
   try {
-    const res = await fetch("/api/tts", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        text: text,
-        engine: engine,
-        speaker: speakerSelect.value,
-      }),
-    });
-    if (!res.ok) {
-      const data = await res.json();
-      addBubble("error", data.error || "音声合成に失敗しました");
-      return;
+    let nextAudio = fetchTtsAudio(sentences[0], engine, speaker);
+    for (let i = 0; i < sentences.length; i++) {
+      const url = await nextAudio;
+      // 次の文の合成を裏で開始しておく（最後の文なら不要）
+      nextAudio = i + 1 < sentences.length ? fetchTtsAudio(sentences[i + 1], engine, speaker) : null;
+      await playAudio(url);
     }
-    const blob = await res.blob();
-    await playAudio(URL.createObjectURL(blob));
   } catch (e) {
     addBubble("error", "音声合成に失敗しました: " + e.message);
   } finally {
