@@ -269,7 +269,12 @@ def api_chat():
     text = (data.get("text") or "").strip()
     provider = data.get("provider", "openai")
     model = data.get("model", "")
-    system_prompt = (data.get("system_prompt") or "").strip() or "あなたは高校生と楽しく会話するアシスタントです。返事は50文字以内で短く話してください。"
+    default_prompt = (
+        "友人が恋人に振られました。共感や励ましはせず、失恋について事実だけを淡々と述べてください。返事は50文字以内で短く話してください。"
+        if SPEECH_MODE
+        else "あなたは高校生と楽しく会話するアシスタントです。返事は50文字以内で短く話してください。"
+    )
+    system_prompt = (data.get("system_prompt") or "").strip() or default_prompt
 
     if not SPEECH_MODE:
         # テキスト専用モードではLLMをGPT固定にする（クライアントからの指定は無視）
