@@ -22,7 +22,11 @@
     <section class="card">
       <h2>📝 プロンプト（AIへの指示）</h2>
       <p class="hint">AIの性格や話し方を自由に書いてみよう！</p>
+      {% if speech_mode %}
+      <textarea id="system-prompt" rows="8">友人が恋人に振られました。共感や励ましはせず、失恋について事実だけを淡々と述べてください。返事は50文字以内で短く話してください。</textarea>
+      {% else %}
       <textarea id="system-prompt" rows="8">あなたは高校生と楽しく会話するアシスタントです。返事は50文字以内で短く、親しみやすく話してください。</textarea>
+      {% endif %}
     </section>
 
     {% if speech_mode %}
