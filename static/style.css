@@ -367,6 +367,18 @@ body {
   background: #fdecea;
 }
 
+.btn-secondary {
+  background: #fff;
+  color: #1a73e8;
+  border: 2px solid #1a73e8;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.btn-secondary:hover {
+  background: #eaf1fd;
+}
+
 /* ---------- 設定画面 ---------- */
 .settings-container {
   flex-direction: column;

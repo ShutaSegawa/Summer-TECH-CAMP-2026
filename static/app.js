@@ -11,6 +11,7 @@
 const providerSelect = document.getElementById("provider-select");
 const modelSelect = document.getElementById("model-select");
 const systemPrompt = document.getElementById("system-prompt");
+const promptResetButton = document.getElementById("prompt-reset-button");
 const ttsSelect = document.getElementById("tts-select");
 const speakerSelect = document.getElementById("speaker-select");
 const speakerRow = document.getElementById("voicevox-speaker-row");
@@ -297,6 +298,11 @@ function sendFromInput() {
 sendButton.addEventListener("click", sendFromInput);
 textInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.isComposing) sendFromInput();
+});
+
+// ---------- プロンプトのリセット ----------
+promptResetButton.addEventListener("click", () => {
+  systemPrompt.value = DEFAULT_SYSTEM_PROMPT;
 });
 
 // ---------- リセット ----------
