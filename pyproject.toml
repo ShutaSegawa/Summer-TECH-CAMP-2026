@@ -2,4 +2,9 @@
 name = "summer-tech-camp-2026"
 version = "0.1.0"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "flask>=3.0",
+    "requests>=2.31",
+    "gTTS>=2.5",
+    "anthropic>=0.100",
+]

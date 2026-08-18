@@ -230,8 +230,6 @@ def chat_with_claude(messages, system_prompt, model):
         model=model,
         max_tokens=2048,
         system=system_prompt,
-        # 対話用途なので応答は素早く（思考は軽め）
-        output_config={"effort": "low"},
         messages=messages,
     )
     if response.stop_reason == "refusal":
